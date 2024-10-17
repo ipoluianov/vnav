@@ -5,6 +5,7 @@ import {Greet} from '../../wailsjs/go/main/App'
 const data = reactive({
   name: "",
   resultText: "Please enter your name below 👇",
+  ttt: "---",
 })
 
 function greet() {
@@ -13,10 +14,17 @@ function greet() {
   })
 }
 
+window.addEventListener('keydown', (event) => {
+  event.preventDefault();
+  console.log(`Key ${event.key} pressed`);
+  data.ttt += `${event.key}`
+});
+
 </script>
 
 <template>
   <main>
+  <div>{{ data.ttt }}</div>
     <div id="result" class="result">{{ data.resultText }}</div>
     <div id="input" class="input-box">
       <input id="name" v-model="data.name" autocomplete="off" class="input" type="text"/>
