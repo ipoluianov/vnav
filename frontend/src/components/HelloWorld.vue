@@ -1,6 +1,6 @@
 <script setup>
 import {reactive} from 'vue'
-import {Greet} from '../../wailsjs/go/main/App'
+import {Greet, Run} from '../../wailsjs/go/main/App'
 
 const data = reactive({
   name: "",
@@ -10,6 +10,12 @@ const data = reactive({
 
 function greet() {
   Greet(data.name).then(result => {
+    data.resultText = result
+  })
+}
+
+function run() {
+  Run(data.name).then(result => {
     data.resultText = result
   })
 }
@@ -29,6 +35,7 @@ window.addEventListener('keydown', (event) => {
     <div id="input" class="input-box">
       <input id="name" v-model="data.name" autocomplete="off" class="input" type="text"/>
       <button class="btn" @click="greet">Greet</button>
+      <button class="btn" @click="run">Run</button>
     </div>
   </main>
 </template>
