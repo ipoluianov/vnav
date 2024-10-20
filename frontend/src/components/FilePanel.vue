@@ -24,7 +24,7 @@ const styleForItem = (index) => {
 const styleForHeader = () => {
     return {
         height: '30px',
-        backgroundColor: props.isActive ? '#F00' : '#000'
+        backgroundColor: props.isActive ? '#444' : '#000'
     }
 }
 

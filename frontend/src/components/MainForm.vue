@@ -13,11 +13,13 @@ const data = reactive(
     {
         currentTab: 0,
         height: '300px',
+        toolbarHeight: 100,
+        footerHeight: 30,
     }
 )
 
 const updateSizes = () => {
-    data.height = (window.innerHeight - 200);
+    data.height = (window.innerHeight - data.toolbarHeight - data.footerHeight);
     data.width = (window.innerWidth);
     data.sepWidth = 3;
 }
@@ -55,11 +57,25 @@ const styleForSeparator = () => {
     }
 }
 
+const styleForToolbar = () => {
+    return {
+        height: data.toolbarHeight + 'px',
+        backgroundColor: '#222'
+    }
+}
+
+const styleForFooter = () => {
+    return {
+        height: data.footerHeight + 'px',
+        backgroundColor: '#222'
+    }
+}
+
 </script>
 
 <template>
     <div style="display: flex; flex-direction: column; height: 100%; max-height: 100%;">
-        <div style="background-color: #E00; height: 100px;">TOOLBAR</div>
+        <div :style="styleForToolbar()">TOOLBAR</div>
         <div style="flex-grow: 1; display: flex; flex-direction: row; background-color: #777;">
             <FilePanel :style="styleForFilePanel()" :panelHeight="data.height" :panelWidth="panelWidth()" :panelIndex="0"
                 :isActive="data.currentTab == 0" />
@@ -67,6 +83,6 @@ const styleForSeparator = () => {
             <FilePanel :style="styleForFilePanel()" :panelHeight="data.height"  :panelWidth="panelWidth()" :panelIndex="1"
                 :isActive="data.currentTab == 1" />
         </div>
-        <div style="background-color: #A94; height: 100px;">FOOTER</div>
+        <div :style="styleForFooter()">FOOTER</div>
     </div>
 </template>
