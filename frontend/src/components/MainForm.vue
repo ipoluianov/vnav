@@ -16,25 +16,28 @@ const data = reactive(
     }
 )
 
-const updateHeight = () => {
+const updateSizes = () => {
     data.height = (window.innerHeight - 200);
+    data.width = (window.innerWidth);
+    data.sepWidth = 3;
 }
 
 function onWindowResize() {
-    updateHeight();
+    updateSizes();
 }
 
 window.addEventListener('resize', onWindowResize);
 
-updateHeight();
+updateSizes();
 
 setInterval(() => {
-    updateHeight();
+    updateSizes();
 }, 200);
 
 const styleForFilePanel = () => {
     return {
         flexGrow: 1,
+        width: (data.width - data.sepWidth) / 2 + 'px',
         height: data.height + 'px',
     }
 }
@@ -42,7 +45,7 @@ const styleForFilePanel = () => {
 const styleForSeparator = () => {
     return {
         //flexGrow: 1,
-        width: '3px',
+        width: data.sepWidth + 'px',
         height: data.height + 'px',
         backgroundColor: '#0F0'
     }

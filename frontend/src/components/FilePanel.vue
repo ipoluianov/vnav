@@ -134,7 +134,7 @@ const tableContainerId = () => {
         <div :style="styleForHeader()">
             {{ data.content.currentPath }}
         </div>
-        <div :id="tableContainerId()" :style="styleForContainer()">
+        <div class="scrollable-content" :id="tableContainerId()" :style="styleForContainer()">
             <table>
                 <thead>
                     <tr>
@@ -182,4 +182,29 @@ thead {
     z-index: 1;
     background-color: #000;
 }
+
+.scrollable-content {
+  scrollbar-width: thin;
+  scrollbar-color: #EEE #333333;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+  background: #333333;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+  background-color: #EEE;
+  border-radius: 10px;
+  border: 3px solid #333333;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+  background-color: #EEE;
+}
+
+
 </style>
