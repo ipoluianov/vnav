@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type FilePanelItem struct {
@@ -149,7 +150,7 @@ func (c *FilePanel) UpdateContent() error {
 					item.IsDir = true
 				} else {
 					item.IsDir = false
-					item.Size = fmt.Sprintf("%d", fi.Size())
+					item.Size = formatFileSize(fi.Size())
 				}
 			}
 
@@ -178,4 +179,48 @@ func (c *FilePanel) UpdateContent() error {
 	}
 
 	return nil
+}
+
+func formatFileSize(bytes int64) string {
+	const (
+		kb = 1024
+		mb = kb * 1024
+		gb = mb * 1024
+		tb = gb * 1024
+	)
+
+	/*var size float64
+	var unit string
+
+	switch {
+	case bytes >= tb:
+		size = float64(bytes) / tb
+		unit = "TB"
+	case bytes >= gb:
+		size = float64(bytes) / gb
+		unit = "GB"
+	case bytes >= mb:
+		size = float64(bytes) / mb
+		unit = "MB"
+	default:
+		size = float64(bytes)
+		unit = ""
+	}*/
+
+	result := formatNumber(fmt.Sprint(bytes))
+
+	return result
+}
+
+func formatNumber(s string) string {
+	var result []string
+	n := len(s)
+	for i := n; i > 0; i -= 3 {
+		start := i - 3
+		if start < 0 {
+			start = 0
+		}
+		result = append([]string{s[start:i]}, result...)
+	}
+	return strings.Join(result, " ")
 }

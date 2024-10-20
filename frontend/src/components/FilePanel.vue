@@ -92,7 +92,7 @@ const  scrollToRow = (rowId) => {
     }
 }
 
-const scrollToRowIfNotVisible = (rowId, behavior = 'smooth') => {
+const scrollToRowIfNotVisible = (rowId, behavior = 'instant') => {
     const element = document.getElementById(rowId);
     if (element) {
         const tableContainer = document.getElementById(tableContainerId());
