@@ -13,6 +13,8 @@ type FilePanelItem struct {
 	Size       string `json:"size"`
 	IsDir      bool   `json:"isDir"`
 	IsSelected bool   `json:"isSelected"`
+	FullPath   string `json:"fullPath"`
+	LinkPath   string `json:"linkPath"`
 }
 
 type FilePanelContent struct {
@@ -44,14 +46,14 @@ func NewFilePanel(index int) *FilePanel {
 	return &c
 }
 
-func (f *FilePanel) SetCurrentItemIndex(index int) {
+func (c *FilePanel) SetCurrentItemIndex(index int) {
 	if index < 0 {
 		index = 0
 	}
-	if index >= len(f.content.Items) {
-		index = len(f.content.Items) - 1
+	if index >= len(c.content.Items) {
+		index = len(c.content.Items) - 1
 	}
-	f.content.CurrentItemIndex = index
+	c.content.CurrentItemIndex = index
 }
 
 func (f *FilePanel) MainAction() {
@@ -141,6 +143,12 @@ func (c *FilePanel) UpdateContent() error {
 		}
 
 		path := c.currentDirectory.String() + "/" + file.Name()
+		if c.currentDirectory.String() == "/" {
+			path = c.currentDirectory.String() + file.Name()
+		}
+
+		item.FullPath = path
+
 		lsInfo, err := os.Lstat(path)
 		if err != nil {
 			infoAvailable = false
@@ -156,6 +164,7 @@ func (c *FilePanel) UpdateContent() error {
 					if err != nil {
 						infoAvailable = false
 					} else {
+						item.LinkPath = linkPath
 						targetInfo, err := os.Stat(linkPath)
 						if err != nil {
 							infoAvailable = false

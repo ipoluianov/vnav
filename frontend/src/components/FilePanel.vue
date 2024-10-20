@@ -34,6 +34,14 @@ const styleForHeader = () => {
     }
 }
 
+const styleForFooter = () => {
+    return {
+        height: '30px',
+        textAlign: 'left',
+    }
+}
+
+
 const props = defineProps({
     isActive: Boolean,
     panelIndex: Number,
@@ -135,7 +143,7 @@ const styleForContainer = () => {
     //console.log("styleForContainer", props.panelHeight);
 
     return {
-        height: (props.panelHeight - 32) + 'px',
+        height: (props.panelHeight - 32-32) + 'px',
         overflowY: 'scroll',
         position: 'relative',
         backgroundColor: '#111',
@@ -144,6 +152,10 @@ const styleForContainer = () => {
 
 const tableContainerId = () => {
     return 'table-container-' + props.panelIndex;
+}
+
+const currentItem = () => {
+    return data.content.items[data.content.currentItemIndex];
 }
 
 const styleForColumn = (column, type) => {
@@ -197,6 +209,14 @@ const styleForColumn = (column, type) => {
                     </tr>
                 </tbody>
             </table>
+        </div>
+        <div :style="styleForFooter()">
+            <div style="font-size: 12px;">
+                Full path: {{ currentItem().fullPath}}
+            </div>
+            <div style="font-size: 12px;">
+                Link path: {{ currentItem().linkPath}}
+            </div>
         </div>
     </div>
 </template>
