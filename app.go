@@ -45,3 +45,11 @@ func (c *App) SetCurrentItemIndex(panelIndex, index int) {
 func (c *App) UpdateContent(panelIndex int) {
 	c.s.UpdateContent(panelIndex)
 }
+
+func (c *App) MainAction(panelIndex int) {
+	c.s.MainAction(panelIndex)
+}
+
+func (c *App) GoBack(panelIndex int) {
+	c.s.GoBack(panelIndex)
+}

@@ -6,8 +6,16 @@ export function GetFilePanelContentAsJson(arg1) {
   return window['go']['main']['App']['GetFilePanelContentAsJson'](arg1);
 }
 
+export function GoBack(arg1) {
+  return window['go']['main']['App']['GoBack'](arg1);
+}
+
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
+}
+
+export function MainAction(arg1) {
+  return window['go']['main']['App']['MainAction'](arg1);
 }
 
 export function Run(arg1) {

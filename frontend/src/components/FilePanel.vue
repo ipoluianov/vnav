@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { GetFilePanelContentAsJson, SetCurrentItemIndex, UpdateContent } from '../../wailsjs/go/main/App'
+import { GetFilePanelContentAsJson, GoBack, MainAction, SetCurrentItemIndex, UpdateContent } from '../../wailsjs/go/main/App'
 
 const data = reactive(
     {
@@ -23,16 +23,18 @@ const styleForItem = (index) => {
 
 const styleForHeader = () => {
     return {
+        height: '30px',
         backgroundColor: props.isActive ? '#F00' : '#000'
     }
 }
 
 const props = defineProps({
     isActive: Boolean,
-    panelIndex: Number
+    panelIndex: Number,
+    panelHeight: Number,
 })
 
-window.addEventListener('keydown', function (event) {
+window.addEventListener('keydown',  async (event) => {
     if (props.isActive === false) {
         return
     }
@@ -45,15 +47,24 @@ window.addEventListener('keydown', function (event) {
         setCurrentItemIndex(data.content.currentItemIndex - 1);
     }
     if (event.key == 'F2') {
-        console.log("F2");
         event.preventDefault();
-        UpdateContent(props.panelIndex);
+        await UpdateContent(props.panelIndex);
+        loadContent();
+    }
+    if (event.key == 'Enter') {
+        event.preventDefault();
+        await MainAction(props.panelIndex);
+        loadContent();
+    }
+    if (event.key == 'Backspace') {
+        event.preventDefault();
+        await GoBack(props.panelIndex);
         loadContent();
     }
 });
 
 const setCurrentItemIndex = async (index) => {
-    console.log("setCurrentItemIndex", index);
+    console.log("setCurrentItemIndex", '['+props.panelIndex+']', index, " isActive:", props.isActive);
     await SetCurrentItemIndex(props.panelIndex, index);
     loadContent();
 }
@@ -68,7 +79,7 @@ const idForRow = (index) => {
     return 'panel_' + props.panelIndex + '_row_' + index;
 }
 
-function scrollToRow(rowId) {
+const  scrollToRow = (rowId) => {
     scrollToRowIfNotVisible(rowId);
     return;
     const element = document.getElementById(rowId);
@@ -77,14 +88,14 @@ function scrollToRow(rowId) {
     }
 }
 
-function scrollToRowIfNotVisible(rowId) {
+const scrollToRowIfNotVisible = (rowId) => {
     const element = document.getElementById(rowId);
     if (element) {
-        const tableContainer = document.querySelector('.table-container');
+        const tableContainer = document.getElementById(tableContainerId());
         const elementRect = element.getBoundingClientRect();
         const containerRect = tableContainer.getBoundingClientRect();
         const thead = document.querySelector('thead');
-        const headerHeight = thead ? thead.offsetHeight : 0; 
+        const headerHeight = thead ? thead.offsetHeight : 0;
 
         const isElementVisible = (
             elementRect.top >= containerRect.top + headerHeight &&
@@ -94,21 +105,36 @@ function scrollToRowIfNotVisible(rowId) {
         if (!isElementVisible) {
             const scrollOffset = elementRect.top - containerRect.top - headerHeight;
             tableContainer.scrollBy({ top: scrollOffset, behavior: 'instant' });
+            console.log("SCROLL", rowId);
         }
     }
 }
 
 loadContent();
 
+const styleForContainer = () => {
+    //console.log("styleForContainer", props.panelHeight);
+
+    return {
+        height: (props.panelHeight-32) + 'px',
+        overflowY: 'scroll',
+        position: 'relative',
+        backgroundColor: '#111',
+    }
+}
+
+const tableContainerId = () => {
+    return 'table-container-' + props.panelIndex;
+}
+
 </script>
 
 <template>
     <div style="display: block;" v-if="data.content != null">
-        FILEPANEL
         <div :style="styleForHeader()">
-            {{ props.isActive }}
+            {{ data.content.currentPath }}
         </div>
-        <div class="table-container">
+        <div :id="tableContainerId()" :style="styleForContainer()">
             <table>
                 <thead>
                     <tr>
@@ -117,8 +143,8 @@ loadContent();
                     </tr>
                 </thead>
                 <tbody>
-                    <tr :id="idForRow(index)" v-for="(file, index) in data.content.items" :key="index" @click="onClickItem(index)"
-                        @dblclick="onDblClickItem(index)" :style="styleForItem(index)">
+                    <tr :id="idForRow(index)" v-for="(file, index) in data.content.items" :key="index"
+                        @click="onClickItem(index)" @dblclick="onDblClickItem(index)" :style="styleForItem(index)">
                         <td class="fileName">{{ file.name }}</td>
                         <td class="fileSize">{{ file.size }}</td>
                     </tr>
@@ -149,12 +175,6 @@ td {
     user-select: none;
 }
 
-.table-container {
-    height: 70%;
-    overflow-y: scroll;
-    position: relative;
-    background-color: #111;
-}
 
 thead {
     position: sticky;

@@ -29,3 +29,11 @@ func (c *System) UpdateContent(panelIndex int) {
 	fmt.Println("UpdateContent", panelIndex)
 	c.filePanels[panelIndex].UpdateContent()
 }
+
+func (c *System) MainAction(panelIndex int) {
+	c.filePanels[panelIndex].MainAction()
+}
+
+func (c *System) GoBack(panelIndex int) {
+	c.filePanels[panelIndex].GoBack()
+}

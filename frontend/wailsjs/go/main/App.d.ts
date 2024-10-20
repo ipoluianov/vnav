@@ -3,7 +3,11 @@
 
 export function GetFilePanelContentAsJson(arg1:number):Promise<string>;
 
+export function GoBack(arg1:number):Promise<void>;
+
 export function Greet(arg1:string):Promise<string>;
+
+export function MainAction(arg1:number):Promise<void>;
 
 export function Run(arg1:string):Promise<string>;
 
