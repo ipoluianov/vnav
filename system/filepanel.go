@@ -20,9 +20,14 @@ type FilePanelContent struct {
 	CurrentPath      string           `json:"currentPath"`
 }
 
+type FilePanelContext struct {
+	CurrentItemIndex int
+}
+
 type FilePanel struct {
 	currentDirectory *Path
 	content          FilePanelContent
+	contextStack     []FilePanelContext
 }
 
 func NewFilePanel(index int) *FilePanel {
@@ -49,10 +54,27 @@ func (f *FilePanel) SetCurrentItemIndex(index int) {
 func (f *FilePanel) MainAction() {
 	item := f.content.Items[f.content.CurrentItemIndex]
 	if item.IsDir {
-		f.currentDirectory.Add(item.Name)
-		f.UpdateContent()
+		if item.Name == ".." {
+			f.GoBack()
+		} else {
+			f.GoToDirectory()
+		}
+	} else {
+		fmt.Println("Selected file", item.Name)
 	}
-	f.content.CurrentItemIndex = 0
+}
+
+func (f *FilePanel) GoToDirectory() {
+	item := f.content.Items[f.content.CurrentItemIndex]
+	if len(f.contextStack) > 0 {
+		f.contextStack[len(f.contextStack)-1].CurrentItemIndex = f.content.CurrentItemIndex
+	}
+	if item.IsDir {
+		f.currentDirectory.Add(item.Name)
+		f.contextStack = append(f.contextStack, FilePanelContext{CurrentItemIndex: 0})
+		f.UpdateContent()
+		f.content.CurrentItemIndex = 0
+	}
 }
 
 func (f *FilePanel) GoBack() {
@@ -61,7 +83,11 @@ func (f *FilePanel) GoBack() {
 	}
 	f.currentDirectory.Items = f.currentDirectory.Items[:len(f.currentDirectory.Items)-1]
 	f.UpdateContent()
-	f.content.CurrentItemIndex = 0
+	if len(f.contextStack) > 1 {
+		f.contextStack = f.contextStack[:len(f.contextStack)-1]
+		context := f.contextStack[len(f.contextStack)-1]
+		f.content.CurrentItemIndex = context.CurrentItemIndex
+	}
 }
 
 func (f *FilePanel) SetCurrentDirectory(path *Path) {
@@ -84,6 +110,7 @@ func (c *FilePanel) UpdateContent() {
 	}
 
 	c.content.Items = make([]*FilePanelItem, 0)
+	items := make([]*FilePanelItem, 0)
 	for _, file := range files {
 		var item FilePanelItem
 		item.Name = file.Name()
@@ -99,6 +126,22 @@ func (c *FilePanel) UpdateContent() {
 
 		}
 		item.IsDir = file.IsDir()
-		c.content.Items = append(c.content.Items, &item)
+		items = append(items, &item)
+	}
+
+	if len(c.currentDirectory.Items) > 0 {
+		c.content.Items = append(c.content.Items, &FilePanelItem{Name: "..", Size: "[DIR]", IsDir: true})
+	}
+
+	for _, item := range items {
+		if item.IsDir {
+			c.content.Items = append(c.content.Items, item)
+		}
+	}
+
+	for _, item := range items {
+		if !item.IsDir {
+			c.content.Items = append(c.content.Items, item)
+		}
 	}
 }

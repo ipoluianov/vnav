@@ -47,7 +47,7 @@ const styleForSeparator = () => {
         //flexGrow: 1,
         width: data.sepWidth + 'px',
         height: data.height + 'px',
-        backgroundColor: '#0F0'
+        backgroundColor: '#CCC'
     }
 }
 

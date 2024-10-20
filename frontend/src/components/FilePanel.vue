@@ -49,30 +49,34 @@ window.addEventListener('keydown',  async (event) => {
     if (event.key == 'F2') {
         event.preventDefault();
         await UpdateContent(props.panelIndex);
-        loadContent();
+        await loadContent();
     }
     if (event.key == 'Enter') {
         event.preventDefault();
         await MainAction(props.panelIndex);
-        loadContent();
+        await loadContent();
     }
     if (event.key == 'Backspace') {
         event.preventDefault();
         await GoBack(props.panelIndex);
-        loadContent();
+        await loadContent();
     }
 });
 
 const setCurrentItemIndex = async (index) => {
     console.log("setCurrentItemIndex", '['+props.panelIndex+']', index, " isActive:", props.isActive);
     await SetCurrentItemIndex(props.panelIndex, index);
-    loadContent();
+    await loadContent();
 }
 
 const loadContent = async () => {
     const content = await GetFilePanelContentAsJson(props.panelIndex);
     data.content = JSON.parse(content);
-    scrollToRow(idForRow(data.content.currentItemIndex));
+    console.log("loadContent", data.content.currentItemIndex);
+    setTimeout(() => {
+        scrollToRow(idForRow(data.content.currentItemIndex));
+    }, 10);
+    //scrollToRow(idForRow(data.content.currentItemIndex));
 }
 
 const idForRow = (index) => {
