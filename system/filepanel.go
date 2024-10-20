@@ -39,6 +39,7 @@ func NewFilePanel(index int) *FilePanel {
 	c.content.Items = make([]*FilePanelItem, 0)
 	c.content.CurrentItemIndex = 0
 	c.content.PanelIndex = index
+	c.contextStack = append(c.contextStack, FilePanelContext{CurrentItemIndex: 0})
 	c.UpdateContent()
 	return &c
 }
@@ -198,33 +199,7 @@ func (c *FilePanel) UpdateContent() error {
 }
 
 func formatFileSize(bytes int64) string {
-	const (
-		kb = 1024
-		mb = kb * 1024
-		gb = mb * 1024
-		tb = gb * 1024
-	)
-
-	/*var size float64
-	var unit string
-
-	switch {
-	case bytes >= tb:
-		size = float64(bytes) / tb
-		unit = "TB"
-	case bytes >= gb:
-		size = float64(bytes) / gb
-		unit = "GB"
-	case bytes >= mb:
-		size = float64(bytes) / mb
-		unit = "MB"
-	default:
-		size = float64(bytes)
-		unit = ""
-	}*/
-
 	result := formatNumber(fmt.Sprint(bytes))
-
 	return result
 }
 
