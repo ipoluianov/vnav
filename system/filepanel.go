@@ -66,23 +66,37 @@ func (f *FilePanel) MainAction() {
 
 func (f *FilePanel) GoToDirectory() {
 	item := f.content.Items[f.content.CurrentItemIndex]
+
+	f.currentDirectory.Items = append(f.currentDirectory.Items, item.Name)
+
+	err := f.UpdateContent()
+	if err != nil {
+		f.currentDirectory.Items = f.currentDirectory.Items[:len(f.currentDirectory.Items)-1]
+		f.UpdateContent()
+		return
+	}
+
 	if len(f.contextStack) > 0 {
 		f.contextStack[len(f.contextStack)-1].CurrentItemIndex = f.content.CurrentItemIndex
 	}
-	if item.IsDir {
-		f.currentDirectory.Add(item.Name)
-		f.contextStack = append(f.contextStack, FilePanelContext{CurrentItemIndex: 0})
-		f.UpdateContent()
-		f.content.CurrentItemIndex = 0
-	}
+
+	f.content.CurrentItemIndex = 0
+	f.contextStack = append(f.contextStack, FilePanelContext{CurrentItemIndex: 0})
 }
 
 func (f *FilePanel) GoBack() {
 	if len(f.currentDirectory.Items) == 0 {
 		return
 	}
+	lastPath := f.currentDirectory.Clone()
 	f.currentDirectory.Items = f.currentDirectory.Items[:len(f.currentDirectory.Items)-1]
-	f.UpdateContent()
+	err := f.UpdateContent()
+	if err != nil {
+		f.currentDirectory = lastPath
+		f.UpdateContent()
+		return
+	}
+
 	if len(f.contextStack) > 1 {
 		f.contextStack = f.contextStack[:len(f.contextStack)-1]
 		context := f.contextStack[len(f.contextStack)-1]
@@ -99,14 +113,13 @@ func (c *FilePanel) GetContentAsJson() string {
 	return string(bs)
 }
 
-func (c *FilePanel) UpdateContent() {
-
+func (c *FilePanel) UpdateContent() error {
 	c.content.CurrentPath = c.currentDirectory.String()
 
 	files, err := os.ReadDir(c.currentDirectory.String())
 	if err != nil {
 		fmt.Println("Error reading directory", c.currentDirectory.String(), err)
-		return
+		return err
 	}
 
 	c.content.Items = make([]*FilePanelItem, 0)
@@ -114,18 +127,37 @@ func (c *FilePanel) UpdateContent() {
 	for _, file := range files {
 		var item FilePanelItem
 		item.Name = file.Name()
-		if file.IsDir() {
-			item.Size = "[DIR]"
-		} else {
-			fi, err := file.Info()
-			if err == nil {
-				item.Size = fmt.Sprintf("%d", fi.Size())
+
+		infoAvailable := true
+
+		fi, err := file.Info()
+		if err != nil {
+			infoAvailable = false
+		}
+
+		lsInfo, err := os.Lstat(c.currentDirectory.String() + "/" + file.Name())
+		if err != nil {
+			infoAvailable = false
+		}
+
+		if infoAvailable {
+
+			if fi.IsDir() {
+				item.IsDir = true
 			} else {
-				item.Size = "err"
+				if lsInfo.Mode()&os.ModeSymlink != 0 {
+					item.IsDir = true
+				} else {
+					item.IsDir = false
+					item.Size = fmt.Sprintf("%d", fi.Size())
+				}
 			}
 
+			if item.IsDir {
+				item.Size = "[DIR]"
+			}
 		}
-		item.IsDir = file.IsDir()
+
 		items = append(items, &item)
 	}
 
@@ -144,4 +176,6 @@ func (c *FilePanel) UpdateContent() {
 			c.content.Items = append(c.content.Items, item)
 		}
 	}
+
+	return nil
 }
