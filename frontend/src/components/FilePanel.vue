@@ -92,7 +92,7 @@ const  scrollToRow = (rowId) => {
     }
 }
 
-const scrollToRowIfNotVisible = (rowId) => {
+const scrollToRowIfNotVisible = (rowId, behavior = 'smooth') => {
     const element = document.getElementById(rowId);
     if (element) {
         const tableContainer = document.getElementById(tableContainerId());
@@ -107,12 +107,20 @@ const scrollToRowIfNotVisible = (rowId) => {
         );
 
         if (!isElementVisible) {
-            const scrollOffset = elementRect.top - containerRect.top - headerHeight;
-            tableContainer.scrollBy({ top: scrollOffset, behavior: 'instant' });
-            console.log("SCROLL", rowId);
+            let scrollOffset = 0;
+
+            if (elementRect.top < containerRect.top + headerHeight) {
+                scrollOffset = elementRect.top - containerRect.top - headerHeight;
+            } else if (elementRect.bottom > containerRect.bottom) {
+                scrollOffset = elementRect.bottom - containerRect.bottom;
+            }
+
+            tableContainer.scrollBy({ top: scrollOffset, behavior });
+            console.log("SCROLL to", rowId);
         }
     }
-}
+};
+
 
 loadContent();
 
