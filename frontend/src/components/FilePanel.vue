@@ -32,6 +32,7 @@ const props = defineProps({
     isActive: Boolean,
     panelIndex: Number,
     panelHeight: Number,
+    panelWidth: Number,
 })
 
 window.addEventListener('keydown',  async (event) => {
@@ -139,6 +140,34 @@ const tableContainerId = () => {
     return 'table-container-' + props.panelIndex;
 }
 
+const styleForColumn = (column, type) => {
+    let sizeColumnWidth = 100;
+
+    if (column == 'filename') {
+        return {
+            width: props.panelWidth - sizeColumnWidth + 'px',
+            maxWidth: sizeColumnWidth + 'px',
+            textAlign: 'left',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+        }
+    }
+    if (column == 'size') {
+        return {
+            width: sizeColumnWidth + 'px',
+            maxWidth: sizeColumnWidth + 'px',
+            textAlign: 'right',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+        }
+    }
+
+    return {
+    }
+}
+
 </script>
 
 <template>
@@ -150,15 +179,15 @@ const tableContainerId = () => {
             <table>
                 <thead>
                     <tr>
-                        <th>FileName</th>
-                        <th>Size</th>
+                        <th :style="styleForColumn('filename', 'header')">FileName</th>
+                        <th :style="styleForColumn('size', 'header')">Size</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr :id="idForRow(index)" v-for="(file, index) in data.content.items" :key="index"
                         @click="onClickItem(index)" @dblclick="onDblClickItem(index)" :style="styleForItem(index)">
-                        <td class="fileName">{{ file.name }}</td>
-                        <td class="fileSize">{{ file.size }}</td>
+                        <td :style="styleForColumn('filename', 'header')" class="fileName">{{ file.name }}</td>
+                        <td :style="styleForColumn('size', 'header')" class="fileSize">{{ file.size }}</td>
                     </tr>
                 </tbody>
             </table>

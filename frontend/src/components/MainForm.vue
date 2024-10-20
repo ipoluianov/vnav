@@ -34,10 +34,14 @@ setInterval(() => {
     updateSizes();
 }, 200);
 
+const panelWidth = () => {
+    return (data.width - data.sepWidth) / 2;
+}
+
 const styleForFilePanel = () => {
     return {
         flexGrow: 1,
-        width: (data.width - data.sepWidth) / 2 + 'px',
+        width: panelWidth() + 'px',
         height: data.height + 'px',
     }
 }
@@ -57,10 +61,10 @@ const styleForSeparator = () => {
     <div style="display: flex; flex-direction: column; height: 100%; max-height: 100%;">
         <div style="background-color: #E00; height: 100px;">TOOLBAR</div>
         <div style="flex-grow: 1; display: flex; flex-direction: row; background-color: #777;">
-            <FilePanel :style="styleForFilePanel()" :panelHeight="data.height" :panelIndex="0"
+            <FilePanel :style="styleForFilePanel()" :panelHeight="data.height" :panelWidth="panelWidth()" :panelIndex="0"
                 :isActive="data.currentTab == 0" />
             <div :style="styleForSeparator()"></div>
-            <FilePanel :style="styleForFilePanel()" :panelHeight="data.height" :panelIndex="1"
+            <FilePanel :style="styleForFilePanel()" :panelHeight="data.height"  :panelWidth="panelWidth()" :panelIndex="1"
                 :isActive="data.currentTab == 1" />
         </div>
         <div style="background-color: #A94; height: 100px;">FOOTER</div>

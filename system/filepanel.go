@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -117,6 +118,8 @@ func (c *FilePanel) GetContentAsJson() string {
 func (c *FilePanel) UpdateContent() error {
 	c.content.CurrentPath = c.currentDirectory.String()
 
+	fmt.Println("Reading directory", c.currentDirectory.String())
+
 	files, err := os.ReadDir(c.currentDirectory.String())
 	if err != nil {
 		fmt.Println("Error reading directory", c.currentDirectory.String(), err)
@@ -136,7 +139,8 @@ func (c *FilePanel) UpdateContent() error {
 			infoAvailable = false
 		}
 
-		lsInfo, err := os.Lstat(c.currentDirectory.String() + "/" + file.Name())
+		path := c.currentDirectory.String() + "/" + file.Name()
+		lsInfo, err := os.Lstat(path)
 		if err != nil {
 			infoAvailable = false
 		}
@@ -147,7 +151,19 @@ func (c *FilePanel) UpdateContent() error {
 				item.IsDir = true
 			} else {
 				if lsInfo.Mode()&os.ModeSymlink != 0 {
-					item.IsDir = true
+					linkPath, err := filepath.EvalSymlinks(path)
+					if err != nil {
+						infoAvailable = false
+					} else {
+						targetInfo, err := os.Stat(linkPath)
+						if err != nil {
+							infoAvailable = false
+						} else {
+							if targetInfo.IsDir() {
+								item.IsDir = true
+							}
+						}
+					}
 				} else {
 					item.IsDir = false
 					item.Size = formatFileSize(fi.Size())
