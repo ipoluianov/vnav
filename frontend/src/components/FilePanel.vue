@@ -8,7 +8,10 @@ const data = reactive(
     }
 )
 
+const emit = defineEmits(['custom-event']);
+
 const onClickItem = (index) => {
+    emit('activate-panel', props.panelIndex);
     setCurrentItemIndex(index);
 }
 
@@ -16,9 +19,12 @@ const onDblClickItem = (index) => {
 }
 
 const styleForItem = (index) => {
-    return {
-        backgroundColor: index === data.content.currentItemIndex ? '#444' : '#00000000'
+    if (props.isActive == true) {
+        return {
+            backgroundColor: index === data.content.currentItemIndex ? '#444' : '#00000000'
+        }
     }
+    return {}
 }
 
 const styleForHeader = () => {
@@ -35,7 +41,7 @@ const props = defineProps({
     panelWidth: Number,
 })
 
-window.addEventListener('keydown',  async (event) => {
+window.addEventListener('keydown', async (event) => {
     if (props.isActive === false) {
         return
     }
@@ -65,7 +71,7 @@ window.addEventListener('keydown',  async (event) => {
 });
 
 const setCurrentItemIndex = async (index) => {
-    console.log("setCurrentItemIndex", '['+props.panelIndex+']', index, " isActive:", props.isActive);
+    console.log("setCurrentItemIndex", '[' + props.panelIndex + ']', index, " isActive:", props.isActive);
     await SetCurrentItemIndex(props.panelIndex, index);
     await loadContent();
 }
@@ -84,7 +90,7 @@ const idForRow = (index) => {
     return 'panel_' + props.panelIndex + '_row_' + index;
 }
 
-const  scrollToRow = (rowId) => {
+const scrollToRow = (rowId) => {
     scrollToRowIfNotVisible(rowId);
     return;
     const element = document.getElementById(rowId);
@@ -129,7 +135,7 @@ const styleForContainer = () => {
     //console.log("styleForContainer", props.panelHeight);
 
     return {
-        height: (props.panelHeight-32) + 'px',
+        height: (props.panelHeight - 32) + 'px',
         overflowY: 'scroll',
         position: 'relative',
         backgroundColor: '#111',
@@ -225,27 +231,25 @@ thead {
 }
 
 .scrollable-content {
-  scrollbar-width: thin;
-  scrollbar-color: #EEE #333333;
+    scrollbar-width: thin;
+    scrollbar-color: #EEE #333333;
 }
 
 .scrollable-content::-webkit-scrollbar {
-  width: 12px;
+    width: 12px;
 }
 
 .scrollable-content::-webkit-scrollbar-track {
-  background: #333333;
+    background: #333333;
 }
 
 .scrollable-content::-webkit-scrollbar-thumb {
-  background-color: #EEE;
-  border-radius: 10px;
-  border: 3px solid #333333;
+    background-color: #EEE;
+    border-radius: 10px;
+    border: 3px solid #333333;
 }
 
 .scrollable-content::-webkit-scrollbar-thumb:hover {
-  background-color: #EEE;
+    background-color: #EEE;
 }
-
-
 </style>

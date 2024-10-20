@@ -9,6 +9,10 @@ window.addEventListener('keydown', function (event) {
     }
 });
 
+const activatePanel = (index) => {
+    data.currentTab = index;
+}
+
 const data = reactive(
     {
         currentTab: 0,
@@ -77,10 +81,10 @@ const styleForFooter = () => {
     <div style="display: flex; flex-direction: column; height: 100%; max-height: 100%;">
         <div :style="styleForToolbar()">TOOLBAR</div>
         <div style="flex-grow: 1; display: flex; flex-direction: row; background-color: #777;">
-            <FilePanel :style="styleForFilePanel()" :panelHeight="data.height" :panelWidth="panelWidth()" :panelIndex="0"
+            <FilePanel @activate-panel="activatePanel(0)" :style="styleForFilePanel()" :panelHeight="data.height" :panelWidth="panelWidth()" :panelIndex="0"
                 :isActive="data.currentTab == 0" />
             <div :style="styleForSeparator()"></div>
-            <FilePanel :style="styleForFilePanel()" :panelHeight="data.height"  :panelWidth="panelWidth()" :panelIndex="1"
+            <FilePanel @activate-panel="activatePanel(1)" :style="styleForFilePanel()" :panelHeight="data.height"  :panelWidth="panelWidth()" :panelIndex="1"
                 :isActive="data.currentTab == 1" />
         </div>
         <div :style="styleForFooter()">FOOTER</div>
