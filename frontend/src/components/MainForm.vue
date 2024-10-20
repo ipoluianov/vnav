@@ -17,7 +17,7 @@ const data = reactive(
     {
         currentTab: 0,
         height: '300px',
-        toolbarHeight: 100,
+        toolbarHeight: 30,
         footerHeight: 30,
     }
 )
