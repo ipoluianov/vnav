@@ -76,6 +76,23 @@ window.addEventListener('keydown', async (event) => {
         await GoBack(props.panelIndex);
         await loadContent();
     }
+    if (event.key == 'PageUp') {
+        event.preventDefault();
+        setCurrentItemIndex(data.content.currentItemIndex - 10);
+    }
+    if (event.key == 'PageDown') {
+        event.preventDefault();
+        setCurrentItemIndex(data.content.currentItemIndex + 10);
+    }
+    if (event.key == 'Home') {
+        event.preventDefault();
+        setCurrentItemIndex(0);
+    }
+    if (event.key == 'End') {
+        event.preventDefault();
+        setCurrentItemIndex(data.content.items.length - 1);
+    }
+    console.log(event.key);
 });
 
 const setCurrentItemIndex = async (index) => {
