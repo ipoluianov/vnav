@@ -204,7 +204,7 @@ const styleForColumn = (column, type) => {
                 <tbody>
                     <tr :id="idForRow(index)" v-for="(file, index) in data.content.items" :key="index"
                         @click="onClickItem(index)" @dblclick="onDblClickItem(index)" :style="styleForItem(index)">
-                        <td :style="styleForColumn('filename', 'header')" class="fileName">{{ file.name }}</td>
+                        <td :style="styleForColumn('filename', 'header')" class="fileName">{{ file.displayName }}</td>
                         <td :style="styleForColumn('size', 'header')" class="fileSize">{{ file.size }}</td>
                     </tr>
                 </tbody>
@@ -222,6 +222,10 @@ const styleForColumn = (column, type) => {
 </template>
 
 <style scoped>
+div {
+    font-family: 'Consolas', 'Courier New', Courier, monospace;
+    font-size: 18px;
+}
 table {
     width: 100%;
     border-collapse: collapse;

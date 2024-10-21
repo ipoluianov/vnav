@@ -9,12 +9,13 @@ import (
 )
 
 type FilePanelItem struct {
-	Name       string `json:"name"`
-	Size       string `json:"size"`
-	IsDir      bool   `json:"isDir"`
-	IsSelected bool   `json:"isSelected"`
-	FullPath   string `json:"fullPath"`
-	LinkPath   string `json:"linkPath"`
+	Name        string `json:"name"`
+	DisplayName string `json:"displayName"`
+	Size        string `json:"size"`
+	IsDir       bool   `json:"isDir"`
+	IsSelected  bool   `json:"isSelected"`
+	FullPath    string `json:"fullPath"`
+	LinkPath    string `json:"linkPath"`
 }
 
 type FilePanelContent struct {
@@ -181,7 +182,10 @@ func (c *FilePanel) UpdateContent() error {
 			}
 
 			if item.IsDir {
-				item.Size = "[DIR]"
+				item.Size = "<DIR>"
+				item.DisplayName = "[" + item.Name + "]"
+			} else {
+				item.DisplayName = item.Name
 			}
 		}
 
@@ -189,7 +193,7 @@ func (c *FilePanel) UpdateContent() error {
 	}
 
 	if len(c.currentDirectory.Items) > 0 {
-		c.content.Items = append(c.content.Items, &FilePanelItem{Name: "..", Size: "[DIR]", IsDir: true})
+		c.content.Items = append(c.content.Items, &FilePanelItem{Name: "..", DisplayName: "[..]", Size: "[DIR]", IsDir: true})
 	}
 
 	for _, item := range items {
