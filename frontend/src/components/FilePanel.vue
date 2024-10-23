@@ -8,40 +8,6 @@ const data = reactive(
     }
 )
 
-const emit = defineEmits(['custom-event']);
-
-const onClickItem = (index) => {
-    emit('activate-panel', props.panelIndex);
-    setCurrentItemIndex(index);
-}
-
-const onDblClickItem = (index) => {
-}
-
-const styleForItem = (index) => {
-    if (props.isActive == true) {
-        return {
-            backgroundColor: index === data.content.currentItemIndex ? '#444' : '#00000000'
-        }
-    }
-    return {}
-}
-
-const styleForHeader = () => {
-    return {
-        height: '30px',
-        backgroundColor: props.isActive ? '#444' : '#000'
-    }
-}
-
-const styleForFooter = () => {
-    return {
-        height: '30px',
-        textAlign: 'left',
-    }
-}
-
-
 const props = defineProps({
     isActive: Boolean,
     panelIndex: Number,
@@ -49,6 +15,32 @@ const props = defineProps({
     panelWidth: Number,
 })
 
+const emit = defineEmits(['custom-event']);
+
+const settings = {
+    headerHeight: 32,
+    rowHeight: 25,
+    footerHeight: 32
+};
+
+//////////////////////////////////////////////////////////////////////
+// EVENTS
+//////////////////////////////////////////////////////////////////////
+// CLICK
+const onClickItem = (index) => {
+    emit('activate-panel', props.panelIndex);
+    setCurrentItemIndex(index);
+}
+
+// DOUBLE_CLICK
+const onDblClickItem = async (index) => {
+    emit('activate-panel', props.panelIndex);
+    setCurrentItemIndex(index);
+    await MainAction(props.panelIndex);
+    await loadContent();
+}
+
+// KEYDOWN
 window.addEventListener('keydown', async (event) => {
     if (props.isActive === false) {
         return
@@ -78,11 +70,11 @@ window.addEventListener('keydown', async (event) => {
     }
     if (event.key == 'PageUp') {
         event.preventDefault();
-        setCurrentItemIndex(data.content.currentItemIndex - 10);
+        setCurrentItemIndex(data.content.currentItemIndex - tableVisibleItemsCount());
     }
     if (event.key == 'PageDown') {
         event.preventDefault();
-        setCurrentItemIndex(data.content.currentItemIndex + 10);
+        setCurrentItemIndex(data.content.currentItemIndex + tableVisibleItemsCount());
     }
     if (event.key == 'Home') {
         event.preventDefault();
@@ -94,6 +86,7 @@ window.addEventListener('keydown', async (event) => {
     }
     console.log(event.key);
 });
+//////////////////////////////////////////////////////////////////////
 
 const setCurrentItemIndex = async (index) => {
     console.log("setCurrentItemIndex", '[' + props.panelIndex + ']', index, " isActive:", props.isActive);
@@ -108,7 +101,6 @@ const loadContent = async () => {
     setTimeout(() => {
         scrollToRow(idForRow(data.content.currentItemIndex));
     }, 10);
-    //scrollToRow(idForRow(data.content.currentItemIndex));
 }
 
 const idForRow = (index) => {
@@ -154,54 +146,131 @@ const scrollToRowIfNotVisible = (rowId, behavior = 'instant') => {
 };
 
 
-loadContent();
-
-const styleForContainer = () => {
-    //console.log("styleForContainer", props.panelHeight);
-
-    return {
-        height: (props.panelHeight - 32-32) + 'px',
-        overflowY: 'scroll',
-        position: 'relative',
-        backgroundColor: '#111',
-    }
-}
-
 const tableContainerId = () => {
     return 'table-container-' + props.panelIndex;
+}
+
+const tableVisibleItemsCount = () => {
+    return Math.round(props.panelHeight / settings.rowHeight);
 }
 
 const currentItem = () => {
     return data.content.items[data.content.currentItemIndex];
 }
 
+const styleForItem = (index) => {
+    if (props.isActive == true) {
+        return {
+            backgroundColor: index === data.content.currentItemIndex ? '#444' : '#00000000'
+        }
+    }
+    return {}
+}
+
+const styleForHeader = () => {
+    return {
+        height: '30px',
+        backgroundColor: props.isActive ? '#444' : '#000'
+    }
+}
+
+const styleForFooter = () => {
+    return {
+        height: '30px',
+        textAlign: 'left',
+    }
+}
+
+const styleForContainer = () => {
+    return {
+        height: (props.panelHeight - settings.headerHeight-settings.footerHeight) + 'px',
+        overflowY: 'scroll',
+        position: 'relative',
+        backgroundColor: '#111',
+    }
+}
+
 const styleForColumn = (column, type) => {
+    let extColumnWidth = 100;
     let sizeColumnWidth = 100;
+    let datetimeColumnWidth = 200;
+
+    let paddingLeft = 3;
+    let paddingRight = 3;
+    let paddingTop = 2;
+    let paddingBottom = 2;
+    let paddingLeftRight = (paddingLeft + paddingRight) * 4;
 
     if (column == 'filename') {
+        let width = (props.panelWidth - sizeColumnWidth - extColumnWidth - datetimeColumnWidth - 30 - paddingLeftRight);
         return {
-            width: props.panelWidth - sizeColumnWidth + 'px',
-            maxWidth: sizeColumnWidth + 'px',
+            width: width + 'px',
+            minWidth: width + 'px',
+            maxWidth: width + 'px',
             textAlign: 'left',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            paddingLeft: paddingLeft + 'px',
+            paddingRight: paddingRight + 'px',
+            paddingTop: paddingTop + 'px',
+            paddingBottom: paddingBottom + 'px',
         }
     }
+
     if (column == 'size') {
         return {
             width: sizeColumnWidth + 'px',
+            minWidth: sizeColumnWidth + 'px',
             maxWidth: sizeColumnWidth + 'px',
             textAlign: 'right',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            paddingLeft: paddingLeft + 'px',
+            paddingRight: paddingRight + 'px',
+            paddingTop: paddingTop + 'px',
+            paddingBottom: paddingBottom + 'px',
+        }
+    }
+
+    if (column == 'ext') {
+        return {
+            width: extColumnWidth + 'px',
+            minWidth: extColumnWidth + 'px',
+            maxWidth: extColumnWidth + 'px',
+            textAlign: 'left',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            paddingLeft: paddingLeft + 'px',
+            paddingRight: paddingRight + 'px',
+            paddingTop: paddingTop + 'px',
+            paddingBottom: paddingBottom + 'px',
+        }
+    }
+
+    if (column == 'datetime') {
+        return {
+            width: datetimeColumnWidth + 'px',
+            minWidth: datetimeColumnWidth + 'px',
+            maxWidth: datetimeColumnWidth + 'px',
+            textAlign: 'left',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            paddingLeft: paddingLeft + 'px',
+            paddingRight: paddingRight + 'px',
+            paddingTop: paddingTop + 'px',
+            paddingBottom: paddingBottom + 'px',
         }
     }
 
     return {
     }
 }
+
+loadContent();
 
 </script>
 
@@ -215,14 +284,18 @@ const styleForColumn = (column, type) => {
                 <thead>
                     <tr>
                         <th :style="styleForColumn('filename', 'header')">FileName</th>
+                        <th :style="styleForColumn('ext', 'header')">Ext</th>
                         <th :style="styleForColumn('size', 'header')">Size</th>
+                        <th :style="styleForColumn('datetime', 'header')">Date</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr :id="idForRow(index)" v-for="(file, index) in data.content.items" :key="index"
                         @click="onClickItem(index)" @dblclick="onDblClickItem(index)" :style="styleForItem(index)">
                         <td :style="styleForColumn('filename', 'header')" class="fileName">{{ file.displayName }}</td>
+                        <td :style="styleForColumn('ext', 'header')" class="fileName">{{ file.displayExt }}</td>
                         <td :style="styleForColumn('size', 'header')" class="fileSize">{{ file.size }}</td>
+                        <td :style="styleForColumn('datetime', 'header')" class="fileSize">{{ file.datetime }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -250,10 +323,11 @@ table {
 
 th,
 td {
-    border: 1px solid #000;
-    padding: 8px;
+    border: 1px solid #333;
+    padding: 0px;
     text-align: left;
     user-select: none;
+    height: 25px;
 }
 
 td {

@@ -1,11 +1,11 @@
-package system
+package common
 
 import "runtime"
 
 type Path struct {
-	TP    string   `json:"type"` // type
-	Info  string   `json:"info"` // info
-	Items []string `json:"items"`
+	Driver   string   `json:"type"`     // type
+	RootName string   `json:"rootName"` // rootName
+	Items    []string `json:"items"`    // items
 }
 
 // [type] [info] [...]
@@ -14,11 +14,10 @@ type Path struct {
 
 func NewPath() *Path {
 	var c Path
-	c.TP = "localfs"
+	c.Driver = "localfs"
+	c.RootName = ""
 	if runtime.GOOS == "windows" {
-		c.Info = "w"
-	} else {
-		c.Info = "x"
+		c.RootName = "C:\\"
 	}
 	return &c
 }
@@ -27,22 +26,20 @@ func (c *Path) Add(item string) {
 	c.Items = append(c.Items, item)
 }
 
-func (c Path) String() string {
+func (c Path) String(separator string) string {
 	result := ""
 	for _, item := range c.Items {
-		result += "/" + item
+		result += separator + item
 	}
 	if result == "" {
-		result = "/"
-
+		result = separator
 	}
 	return result
 }
 
 func (c *Path) Clone() *Path {
 	var result Path
-	result.TP = c.TP
-	result.Info = c.Info
+	result.Driver = c.Driver
 	result.Items = append(result.Items, c.Items...)
 	return &result
 }

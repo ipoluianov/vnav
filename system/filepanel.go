@@ -3,26 +3,17 @@ package system
 import (
 	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
+	"os/exec"
+	"runtime"
 	"strings"
+	"vnav/common"
 )
 
-type FilePanelItem struct {
-	Name        string `json:"name"`
-	DisplayName string `json:"displayName"`
-	Size        string `json:"size"`
-	IsDir       bool   `json:"isDir"`
-	IsSelected  bool   `json:"isSelected"`
-	FullPath    string `json:"fullPath"`
-	LinkPath    string `json:"linkPath"`
-}
-
 type FilePanelContent struct {
-	Items            []*FilePanelItem `json:"items"`
-	CurrentItemIndex int              `json:"currentItemIndex"`
-	PanelIndex       int              `json:"panelIndex"`
-	CurrentPath      string           `json:"currentPath"`
+	Items            []*common.Item `json:"items"`
+	CurrentItemIndex int            `json:"currentItemIndex"`
+	PanelIndex       int            `json:"panelIndex"`
+	CurrentPath      string         `json:"currentPath"`
 }
 
 type FilePanelContext struct {
@@ -30,16 +21,18 @@ type FilePanelContext struct {
 }
 
 type FilePanel struct {
-	currentDirectory *Path
+	driver           common.Driver
+	currentDirectory *common.Path
 	content          FilePanelContent
 	contextStack     []FilePanelContext
 }
 
-func NewFilePanel(index int) *FilePanel {
+func NewFilePanel(index int, driver common.Driver) *FilePanel {
 	var c FilePanel
+	c.driver = driver
 	c.content.PanelIndex = index
-	c.currentDirectory = NewPath()
-	c.content.Items = make([]*FilePanelItem, 0)
+	c.currentDirectory = driver.GetRoot()
+	c.content.Items = make([]*common.Item, 0)
 	c.content.CurrentItemIndex = 0
 	c.content.PanelIndex = index
 	c.contextStack = append(c.contextStack, FilePanelContext{CurrentItemIndex: 0})
@@ -67,7 +60,23 @@ func (f *FilePanel) MainAction() {
 		}
 	} else {
 		fmt.Println("Selected file", item.Name)
+		f.openFile(item.FullPath)
 	}
+}
+
+func (f *FilePanel) openFile(filePath string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", filePath)
+	case "darwin":
+		cmd = exec.Command("open", filePath)
+	case "linux":
+		cmd = exec.Command("xdg-open", filePath)
+	default:
+		return fmt.Errorf("unsupported platform")
+	}
+	return cmd.Start()
 }
 
 func (f *FilePanel) GoToDirectory() {
@@ -110,7 +119,7 @@ func (f *FilePanel) GoBack() {
 	}
 }
 
-func (f *FilePanel) SetCurrentDirectory(path *Path) {
+func (f *FilePanel) SetCurrentDirectory(path *common.Path) {
 	f.currentDirectory = path
 }
 
@@ -120,91 +129,29 @@ func (c *FilePanel) GetContentAsJson() string {
 }
 
 func (c *FilePanel) UpdateContent() error {
-	c.content.CurrentPath = c.currentDirectory.String()
-
-	fmt.Println("Reading directory", c.currentDirectory.String())
-
-	files, err := os.ReadDir(c.currentDirectory.String())
-	if err != nil {
-		fmt.Println("Error reading directory", c.currentDirectory.String(), err)
-		return err
-	}
-
-	c.content.Items = make([]*FilePanelItem, 0)
-	items := make([]*FilePanelItem, 0)
-	for _, file := range files {
-		var item FilePanelItem
-		item.Name = file.Name()
-
-		infoAvailable := true
-
-		fi, err := file.Info()
+	if true {
+		items, err := c.driver.ReadDir(c.currentDirectory)
 		if err != nil {
-			infoAvailable = false
+			return err
 		}
 
-		path := c.currentDirectory.String() + "/" + file.Name()
-		if c.currentDirectory.String() == "/" {
-			path = c.currentDirectory.String() + file.Name()
+		c.content.CurrentPath = c.driver.PathToString(c.currentDirectory)
+		c.content.Items = make([]*common.Item, 0)
+
+		if len(c.currentDirectory.Items) > 0 {
+			c.content.Items = append(c.content.Items, &common.Item{Name: "..", DisplayName: "[..]", Size: "[DIR]", IsDir: true})
 		}
 
-		item.FullPath = path
-
-		lsInfo, err := os.Lstat(path)
-		if err != nil {
-			infoAvailable = false
-		}
-
-		if infoAvailable {
-
-			if fi.IsDir() {
-				item.IsDir = true
-			} else {
-				if lsInfo.Mode()&os.ModeSymlink != 0 {
-					linkPath, err := filepath.EvalSymlinks(path)
-					if err != nil {
-						infoAvailable = false
-					} else {
-						item.LinkPath = linkPath
-						targetInfo, err := os.Stat(linkPath)
-						if err != nil {
-							infoAvailable = false
-						} else {
-							if targetInfo.IsDir() {
-								item.IsDir = true
-							}
-						}
-					}
-				} else {
-					item.IsDir = false
-					item.Size = formatFileSize(fi.Size())
-				}
-			}
-
+		for _, item := range items {
 			if item.IsDir {
-				item.Size = "<DIR>"
-				item.DisplayName = "[" + item.Name + "]"
-			} else {
-				item.DisplayName = item.Name
+				c.content.Items = append(c.content.Items, item)
 			}
 		}
 
-		items = append(items, &item)
-	}
-
-	if len(c.currentDirectory.Items) > 0 {
-		c.content.Items = append(c.content.Items, &FilePanelItem{Name: "..", DisplayName: "[..]", Size: "[DIR]", IsDir: true})
-	}
-
-	for _, item := range items {
-		if item.IsDir {
-			c.content.Items = append(c.content.Items, item)
-		}
-	}
-
-	for _, item := range items {
-		if !item.IsDir {
-			c.content.Items = append(c.content.Items, item)
+		for _, item := range items {
+			if !item.IsDir {
+				c.content.Items = append(c.content.Items, item)
+			}
 		}
 	}
 

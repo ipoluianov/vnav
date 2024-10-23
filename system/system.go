@@ -1,18 +1,51 @@
 package system
 
 import (
+	"runtime"
 	"sync"
+	"vnav/drivers/driver_localfs"
 )
 
 type System struct {
+	drivers    *Drivers
 	filePanels [2]*FilePanel
 	mtx        sync.Mutex
 }
 
 func NewSystem() *System {
 	var c System
-	c.filePanels[0] = NewFilePanel(0)
-	c.filePanels[1] = NewFilePanel(1)
+	c.drivers = NewDrivers()
+
+	if runtime.GOOS == "windows" {
+		drives, err := driver_localfs.GetDrives()
+		if err == nil {
+			for _, drive := range drives {
+				c.drivers.Register(driver_localfs.NewDriverLocalFS(drive))
+			}
+		}
+
+		d0, _ := c.drivers.GetDriver("C:")
+		d1, _ := c.drivers.GetDriver("D:")
+
+		c.filePanels[0] = NewFilePanel(0, d0)
+		c.filePanels[1] = NewFilePanel(1, d1)
+	}
+
+	if runtime.GOOS == "linux" {
+		c.drivers.Register(driver_localfs.NewDriverLocalFS(""))
+		d, _ := c.drivers.GetDriver("")
+
+		c.filePanels[0] = NewFilePanel(0, d)
+		c.filePanels[1] = NewFilePanel(1, d)
+	}
+	if runtime.GOOS == "darwin" {
+		c.drivers.Register(driver_localfs.NewDriverLocalFS(""))
+		d, _ := c.drivers.GetDriver("")
+
+		c.filePanels[0] = NewFilePanel(0, d)
+		c.filePanels[1] = NewFilePanel(1, d)
+	}
+
 	return &c
 }
 
