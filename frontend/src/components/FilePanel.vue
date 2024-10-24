@@ -35,12 +35,20 @@ let paddingLeftRight = (paddingLeft + paddingRight) * 4;
 //////////////////////////////////////////////////////////////////////
 // CLICK
 const onClickItem = (index) => {
+    if (document.dialogIsOpen == true) {
+        return
+    }
+
     emit('activate-panel', props.panelIndex);
     setCurrentItemIndex(index);
 }
 
 // DOUBLE_CLICK
 const onDblClickItem = async (index) => {
+    if (document.dialogIsOpen == true) {
+        return
+    }
+        
     emit('activate-panel', props.panelIndex);
     setCurrentItemIndex(index);
     await MainAction(props.panelIndex);
@@ -49,6 +57,32 @@ const onDblClickItem = async (index) => {
 
 // KEYDOWN
 window.addEventListener('keydown', async (event) => {
+
+    if (event.key == 'Escape') {
+        event.preventDefault();
+        closePanelDialog();
+    }
+
+    if (document.dialogIsOpen == true) {
+        return
+    }
+
+
+    if (props.panelIndex == 0) {
+        if (event.altKey && event.key == 'F1') {
+            event.preventDefault();
+            openPanelDialog();
+        }
+    }
+    if (props.panelIndex == 1) {
+        if (event.altKey && event.key == 'F2') {
+            event.preventDefault();
+            openPanelDialog();
+        }
+    }
+
+
+
     if (props.isActive === false) {
         return
     }
@@ -60,11 +94,13 @@ window.addEventListener('keydown', async (event) => {
         event.preventDefault();
         setCurrentItemIndex(data.content.currentItemIndex - 1);
     }
-    if (event.key == 'F2') {
+    if (!event.altKey && event.key == 'F2') {
         event.preventDefault();
         await UpdateContent(props.panelIndex);
         await loadContent();
     }
+
+
     if (event.key == 'Enter') {
         event.preventDefault();
         await MainAction(props.panelIndex);
@@ -91,6 +127,7 @@ window.addEventListener('keydown', async (event) => {
         event.preventDefault();
         setCurrentItemIndex(data.content.items.length - 1);
     }
+
     console.log(event.key);
 });
 //////////////////////////////////////////////////////////////////////
@@ -273,6 +310,26 @@ const styleForColumn = (column, type) => {
     }
 }
 
+const openPanelDialog = () => {
+    document.getElementById(dialogId()).style.display = 'block';
+    document.getElementById(overlayId()).style.display = 'block';
+    document.dialogIsOpen = true;
+}
+
+const closePanelDialog = () => {
+    document.getElementById(dialogId()).style.display = 'none';
+    document.getElementById(overlayId()).style.display = 'none';
+    document.dialogIsOpen = false;
+}
+
+const overlayId = () => {
+    return 'overlay_' + props.panelIndex;
+}
+
+const dialogId = () => {
+    return 'dialog_' + props.panelIndex;
+}
+
 loadContent();
 
 </script>
@@ -282,26 +339,39 @@ loadContent();
         <div :style="styleForHeader()">
             {{ data.content.currentPath }}
         </div>
-        <div class="scrollable-content" :id="tableContainerId()" :style="styleForContainer()">
-            <table>
-                <thead>
-                    <tr>
-                        <th :style="styleForColumn('filename', 'header')">FileName</th>
-                        <th :style="styleForColumn('ext', 'header')">Ext</th>
-                        <th :style="styleForColumn('size', 'header')">Size</th>
-                        <th :style="styleForColumn('datetime', 'header')">Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr :id="idForRow(index)" v-for="(file, index) in data.content.items" :key="index"
-                        @click="onClickItem(index)" @dblclick="onDblClickItem(index)" :style="styleForItem(index)">
-                        <td :style="styleForColumn('filename', 'header')" class="fileName">{{ file.displayName }}</td>
-                        <td :style="styleForColumn('ext', 'header')" class="fileName">{{ file.displayExt }}</td>
-                        <td :style="styleForColumn('size', 'header')" class="fileSize">{{ file.size }}</td>
-                        <td :style="styleForColumn('datetime', 'header')" class="fileSize">{{ file.datetime }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div style="position: relative;">
+            <div :id="overlayId()" class="overlay" @click="closePanelDialog"></div>
+            <div :id="dialogId()" class="dialog">
+                <h2>Options</h2>
+                <ul>
+                    <li>111</li>
+                    <li>222</li>
+                    <li>333 333 333 333</li>
+                </ul>
+                <button @click="closePanelDialog">Закрыть</button>
+            </div>
+            <div class="scrollable-content" :id="tableContainerId()" :style="styleForContainer()">
+                <table>
+                    <thead>
+                        <tr>
+                            <th :style="styleForColumn('filename', 'header')">FileName</th>
+                            <th :style="styleForColumn('ext', 'header')">Ext</th>
+                            <th :style="styleForColumn('size', 'header')">Size</th>
+                            <th :style="styleForColumn('datetime', 'header')">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr :id="idForRow(index)" v-for="(file, index) in data.content.items" :key="index"
+                            @click="onClickItem(index)" @dblclick="onDblClickItem(index)" :style="styleForItem(index)">
+                            <td :style="styleForColumn('filename', 'header')" class="fileName">{{ file.displayName }}
+                            </td>
+                            <td :style="styleForColumn('ext', 'header')" class="fileName">{{ file.displayExt }}</td>
+                            <td :style="styleForColumn('size', 'header')" class="fileSize">{{ file.size }}</td>
+                            <td :style="styleForColumn('datetime', 'header')" class="fileSize">{{ file.datetime }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div :style="styleForFooter()">
             <div style="font-size: 12px;">
@@ -370,5 +440,29 @@ thead {
 
 .scrollable-content::-webkit-scrollbar-thumb:hover {
     background-color: #EEE;
+}
+
+.dialog {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #888;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
 }
 </style>
