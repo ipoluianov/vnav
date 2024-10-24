@@ -23,6 +23,13 @@ const settings = {
     footerHeight: 32
 };
 
+let paddingLeft = 3;
+let paddingRight = 3;
+let paddingTop = 2;
+let paddingBottom = 2;
+let paddingLeftRight = (paddingLeft + paddingRight) * 4;
+
+
 //////////////////////////////////////////////////////////////////////
 // EVENTS
 //////////////////////////////////////////////////////////////////////
@@ -151,7 +158,9 @@ const tableContainerId = () => {
 }
 
 const tableVisibleItemsCount = () => {
-    return Math.round(props.panelHeight / settings.rowHeight);
+    let rowHeight = settings.rowHeight + paddingBottom + paddingTop + 1;
+    let tableHeight = props.panelHeight - settings.headerHeight - settings.footerHeight - rowHeight;
+    return Math.round(tableHeight / rowHeight) - 1;
 }
 
 const currentItem = () => {
@@ -183,7 +192,7 @@ const styleForFooter = () => {
 
 const styleForContainer = () => {
     return {
-        height: (props.panelHeight - settings.headerHeight-settings.footerHeight) + 'px',
+        height: (props.panelHeight - settings.headerHeight - settings.footerHeight) + 'px',
         overflowY: 'scroll',
         position: 'relative',
         backgroundColor: '#111',
@@ -194,12 +203,6 @@ const styleForColumn = (column, type) => {
     let extColumnWidth = 100;
     let sizeColumnWidth = 100;
     let datetimeColumnWidth = 200;
-
-    let paddingLeft = 3;
-    let paddingRight = 3;
-    let paddingTop = 2;
-    let paddingBottom = 2;
-    let paddingLeftRight = (paddingLeft + paddingRight) * 4;
 
     if (column == 'filename') {
         let width = (props.panelWidth - sizeColumnWidth - extColumnWidth - datetimeColumnWidth - 30 - paddingLeftRight);
@@ -302,10 +305,10 @@ loadContent();
         </div>
         <div :style="styleForFooter()">
             <div style="font-size: 12px;">
-                Full path: {{ currentItem().fullPath}}
+                Full path: {{ currentItem().fullPath }}
             </div>
             <div style="font-size: 12px;">
-                Link path: {{ currentItem().linkPath}}
+                Link path: {{ currentItem().linkPath }}
             </div>
         </div>
     </div>
@@ -316,6 +319,7 @@ div {
     font-family: 'Consolas', 'Courier New', Courier, monospace;
     font-size: 18px;
 }
+
 table {
     width: 100%;
     border-collapse: collapse;
