@@ -37,7 +37,7 @@ func (c *DriverLocalFS) GetRoot() *common.Path {
 }
 
 func (c *DriverLocalFS) Separator() string {
-	return "\\"
+	return "/"
 }
 
 func (c *DriverLocalFS) PathToString(path *common.Path) string {
