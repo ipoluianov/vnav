@@ -58,34 +58,10 @@ const onDblClickItem = async (index) => {
 // KEYDOWN
 window.addEventListener('keydown', async (event) => {
 
-    if (event.key == 'Escape') {
-        event.preventDefault();
-        closePanelDialog();
-    }
-
-    if (document.dialogIsOpen == true) {
-        return
-    }
-
-
-    if (props.panelIndex == 0) {
-        if (event.altKey && event.key == 'F1') {
-            event.preventDefault();
-            openPanelDialog();
-        }
-    }
-    if (props.panelIndex == 1) {
-        if (event.altKey && event.key == 'F2') {
-            event.preventDefault();
-            openPanelDialog();
-        }
-    }
-
-
-
     if (props.isActive === false) {
         return
     }
+
     if (event.key === 'ArrowDown') {
         event.preventDefault();
         setCurrentItemIndex(data.content.currentItemIndex + 1);
@@ -128,7 +104,7 @@ window.addEventListener('keydown', async (event) => {
         setCurrentItemIndex(data.content.items.length - 1);
     }
 
-    console.log(event.key);
+    //console.log(event.key);
 });
 //////////////////////////////////////////////////////////////////////
 
@@ -310,25 +286,6 @@ const styleForColumn = (column, type) => {
     }
 }
 
-const openPanelDialog = () => {
-    document.getElementById(dialogId()).style.display = 'block';
-    document.getElementById(overlayId()).style.display = 'block';
-    document.dialogIsOpen = true;
-}
-
-const closePanelDialog = () => {
-    document.getElementById(dialogId()).style.display = 'none';
-    document.getElementById(overlayId()).style.display = 'none';
-    document.dialogIsOpen = false;
-}
-
-const overlayId = () => {
-    return 'overlay_' + props.panelIndex;
-}
-
-const dialogId = () => {
-    return 'dialog_' + props.panelIndex;
-}
 
 loadContent();
 
@@ -340,16 +297,6 @@ loadContent();
             {{ data.content.currentPath }}
         </div>
         <div style="position: relative;">
-            <div :id="overlayId()" class="overlay" @click="closePanelDialog"></div>
-            <div :id="dialogId()" class="dialog">
-                <h2>Options</h2>
-                <ul>
-                    <li>111</li>
-                    <li>222</li>
-                    <li>333 333 333 333</li>
-                </ul>
-                <button @click="closePanelDialog">Закрыть</button>
-            </div>
             <div class="scrollable-content" :id="tableContainerId()" :style="styleForContainer()">
                 <table>
                     <thead>
@@ -409,6 +356,7 @@ td {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    cursor: default;
 }
 
 
@@ -442,27 +390,4 @@ thead {
     background-color: #EEE;
 }
 
-.dialog {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #888;
-    border: 1px solid #ccc;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-.overlay {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-}
 </style>

@@ -1,8 +1,33 @@
 <script setup>
 import FilePanel from './FilePanel.vue'
+import SelectDriverDialog from './SelectDriverDialog.vue';
 import { ref, reactive } from 'vue'
 
+const dialogKeyDown = (event) => {
+    if (event.key == 'Escape') {
+        event.preventDefault();
+        closePanelDialog();
+    }
+}
+
 window.addEventListener('keydown', function (event) {
+    if (dialogIsOpen.value == true) {
+        dialogKeyDown(event);
+        event.preventDefault();
+        return
+    }
+
+    if (event.altKey && event.key == 'F1') {
+        event.preventDefault();
+        openPanelDialog(0);
+    }
+
+    if (event.altKey && event.key == 'F2') {
+        event.preventDefault();
+        openPanelDialog(1);
+    }
+
+
     if (event.key === 'Tab') {
         event.preventDefault();
         data.currentTab = data.currentTab === 0 ? 1 : 0;
@@ -75,18 +100,92 @@ const styleForFooter = () => {
     }
 }
 
+let dialogIsOpen = ref(false);
+let dialogPosition = -1;
+
+const openPanelDialog = (position) => {
+    dialogPosition = position;
+    dialogIsOpen.value = true;
+}
+
+const closePanelDialog = () => {
+    dialogIsOpen.value = false;
+}
+
+const dialogDivStyle = () => {
+    let top = 100;
+    let left = 0;
+    let dialogWidth = 300;
+    console.log('dialogPosition', dialogPosition);
+
+    if (dialogPosition == 0) {
+        left = 0 + panelWidth() / 2 - dialogWidth / 2;
+    }
+
+    if (dialogPosition == 1) {
+        left = panelWidth() + data.sepWidth + panelWidth() / 2 - dialogWidth / 2;
+    }
+
+    return {
+        top: top + 'px',
+        left: left + 'px',
+        width: dialogWidth + 'px',
+    }
+}
+
+const overlayId = () => {
+    return 'overlay_';
+}
+
+const dialogId = () => {
+    return 'dialog_';
+}
+
 </script>
 
 <template>
     <div style="display: flex; flex-direction: column; height: 100%; max-height: 100%;">
         <div :style="styleForToolbar()">TOOLBAR</div>
-        <div style="flex-grow: 1; display: flex; flex-direction: row; background-color: #777;">
-            <FilePanel @activate-panel="activatePanel(0)" :style="styleForFilePanel()" :panelHeight="data.height" :panelWidth="panelWidth()" :panelIndex="0"
-                :isActive="data.currentTab == 0" />
-            <div :style="styleForSeparator()"></div>
-            <FilePanel @activate-panel="activatePanel(1)" :style="styleForFilePanel()" :panelHeight="data.height"  :panelWidth="panelWidth()" :panelIndex="1"
-                :isActive="data.currentTab == 1" />
+        <div style="position: relative;">
+            <div v-if="dialogIsOpen">
+                <div :id="overlayId()" class="overlay" @click="closePanelDialog"></div>
+                <div :id="dialogId()" class="dialog" :style="dialogDivStyle()">
+                    <SelectDriverDialog />
+                </div>
+            </div>
+
+            <div style="flex-grow: 1; display: flex; flex-direction: row; background-color: #777;">
+                <FilePanel @activate-panel="activatePanel(0)" :style="styleForFilePanel()" :panelHeight="data.height"
+                    :panelWidth="panelWidth()" :panelIndex="0" :isActive="data.currentTab == 0 && !dialogIsOpen" />
+                <div :style="styleForSeparator()"></div>
+                <FilePanel @activate-panel="activatePanel(1)" :style="styleForFilePanel()" :panelHeight="data.height"
+                    :panelWidth="panelWidth()" :panelIndex="1" :isActive="data.currentTab == 1 && !dialogIsOpen" />
+            </div>
         </div>
         <div :style="styleForFooter()">FOOTER</div>
     </div>
 </template>
+<style scoped>
+.dialog {
+    display: block;
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    background-color: #888;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.overlay {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+</style>
