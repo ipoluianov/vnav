@@ -1,6 +1,7 @@
 <script setup>
 import FilePanel from './FilePanel.vue'
 import SelectDriverDialog from './SelectDriverDialog.vue';
+import CreateDirectoryDialog from './CreateDirectoryDialog.vue';
 import { ref, reactive } from 'vue'
 
 const dialogKeyDown = (event) => {
@@ -13,20 +14,23 @@ const dialogKeyDown = (event) => {
 window.addEventListener('keydown', function (event) {
     if (dialogIsOpen.value == true) {
         dialogKeyDown(event);
-        event.preventDefault();
         return
     }
 
     if (event.altKey && event.key == 'F1') {
         event.preventDefault();
-        openPanelDialog(0);
+        openPanelDialog("selectDriver0", 0);
     }
 
     if (event.altKey && event.key == 'F2') {
         event.preventDefault();
-        openPanelDialog(1);
+        openPanelDialog("selectDriver1", 1);
     }
 
+    if (!event.altKey && event.key == 'F7') {
+        event.preventDefault();
+        openPanelDialog("createDirectory", -1);
+    }
 
     if (event.key === 'Tab') {
         event.preventDefault();
@@ -101,9 +105,11 @@ const styleForFooter = () => {
 }
 
 let dialogIsOpen = ref(false);
+let dialogCode = '';    
 let dialogPosition = -1;
 
-const openPanelDialog = (position) => {
+const openPanelDialog = (dialogToOpen, position) => {
+    dialogCode = dialogToOpen;
     dialogPosition = position;
     dialogIsOpen.value = true;
 }
@@ -116,6 +122,7 @@ const dialogDivStyle = () => {
     let top = 100;
     let left = 0;
     let dialogWidth = 300;
+    let dialogHeight = 200;
     console.log('dialogPosition', dialogPosition);
 
     if (dialogPosition == 0) {
@@ -126,10 +133,16 @@ const dialogDivStyle = () => {
         left = panelWidth() + data.sepWidth + panelWidth() / 2 - dialogWidth / 2;
     }
 
+    if (dialogPosition == -1) {
+        left = data.width / 2 - dialogWidth / 2;
+        top = data.height / 2 - dialogHeight / 2;
+    }
+
     return {
         top: top + 'px',
         left: left + 'px',
         width: dialogWidth + 'px',
+        height: dialogHeight + 'px',
     }
 }
 
@@ -150,7 +163,9 @@ const dialogId = () => {
             <div v-if="dialogIsOpen">
                 <div :id="overlayId()" class="overlay" @click="closePanelDialog"></div>
                 <div :id="dialogId()" class="dialog" :style="dialogDivStyle()">
-                    <SelectDriverDialog />
+                    <SelectDriverDialog v-if="dialogCode == 'selectDriver0'" />
+                    <SelectDriverDialog v-if="dialogCode == 'selectDriver1'" />
+                    <CreateDirectoryDialog v-if="dialogCode == 'createDirectory'" />
                 </div>
             </div>
 
