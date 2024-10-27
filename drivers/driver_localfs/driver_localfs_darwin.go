@@ -1,6 +1,7 @@
 package driver_localfs
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -140,7 +141,14 @@ func (c *DriverLocalFS) CreateDirectory(path *common.Path, name string) error {
 	if path.RootName != "" {
 		dir = path.RootName + dir
 	}
-	fmt.Println("Creating directory", dir, name)
+	fmt.Println("Creating directory (Darwin)", dir, name)
+	fullPath := dir + c.Separator() + name
+
+	if _, err := os.Stat(fullPath); err == nil {
+		fmt.Println("Directory already exists", fullPath)
+		return errors.New("directory already exists")
+	}
+
 	err := os.MkdirAll(dir+c.Separator()+name, 0755)
 	if err != nil {
 		fmt.Println("Error creating directory", dir, err)

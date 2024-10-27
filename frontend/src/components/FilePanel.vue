@@ -119,7 +119,7 @@ EventsOn('updateContent', async (panelIndex) => {
 //////////////////////////////////////////////////////////////////////
 
 const setCurrentItemIndex = async (index) => {
-    console.log("setCurrentItemIndex", '[' + props.panelIndex + ']', index, " isActive:", props.isActive);
+    //console.log("setCurrentItemIndex", '[' + props.panelIndex + ']', index, " isActive:", props.isActive);
     await SetCurrentItemIndex(props.panelIndex, index);
     await loadContent();
 }
@@ -127,7 +127,7 @@ const setCurrentItemIndex = async (index) => {
 const loadContent = async () => {
     const content = await GetFilePanelContentAsJson(props.panelIndex);
     data.content = JSON.parse(content);
-    console.log("loadContent", data.content.currentItemIndex);
+    //console.log("loadContent", data.content.currentItemIndex);
     setTimeout(() => {
         scrollToRow(idForRow(data.content.currentItemIndex));
     }, 10);

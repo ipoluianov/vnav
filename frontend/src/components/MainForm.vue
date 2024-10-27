@@ -114,6 +114,7 @@ let dialogIsOpen = ref(false);
 let dialogCode = '';    
 let dialogPosition = -1;
 let dialogOperationIsProcessing = false;
+let dialogError = '';
 
 const openPanelDialog = (dialogToOpen, position) => {
     dialogCode = dialogToOpen;
@@ -122,9 +123,6 @@ const openPanelDialog = (dialogToOpen, position) => {
 }
 
 const closePanelDialog = () => {
-    if (dialogOperationIsProcessing) {
-        return;
-    }
     dialogIsOpen.value = false;
 }
 
@@ -165,13 +163,7 @@ const dialogId = () => {
 }
 
 const createDirectory = async (directoryName, panelIndex) => {
-    dialogOperationIsProcessing = true;
-    console.log('1111Creating directory: ' + directoryName + ' in panel ' + panelIndex);
-    await CreateDirectory(directoryName, panelIndex);
-    EventsEmit('updateContent', panelIndex);
-    dialogOperationIsProcessing = false;
-
-    closePanelDialog();
+        closePanelDialog();
 }
 
 </script>
@@ -206,8 +198,8 @@ const createDirectory = async (directoryName, panelIndex) => {
     position: absolute;
     top: 100px;
     left: 100px;
-    background-color: #888;
-    border: 1px solid #ccc;
+    background-color: #222;
+    border: 1px solid #555;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 1000;
