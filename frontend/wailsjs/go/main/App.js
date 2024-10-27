@@ -22,6 +22,10 @@ export function MainAction(arg1) {
   return window['go']['main']['App']['MainAction'](arg1);
 }
 
+export function Remove(arg1) {
+  return window['go']['main']['App']['Remove'](arg1);
+}
+
 export function Run(arg1) {
   return window['go']['main']['App']['Run'](arg1);
 }

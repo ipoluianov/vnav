@@ -90,3 +90,9 @@ func (c *System) CreateDirectory(name string, panelIndex int) error {
 	defer c.mtx.Unlock()
 	return c.filePanels[panelIndex].CreateDirectory(name)
 }
+
+func (c *System) Remove(panelIndex int) error {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	return c.filePanels[panelIndex].Remove()
+}

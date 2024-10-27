@@ -11,6 +11,8 @@ export function Greet(arg1:string):Promise<string>;
 
 export function MainAction(arg1:number):Promise<void>;
 
+export function Remove(arg1:number):Promise<string>;
+
 export function Run(arg1:string):Promise<string>;
 
 export function SetCurrentItemIndex(arg1:number,arg2:number):Promise<void>;

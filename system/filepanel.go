@@ -128,6 +128,16 @@ func (c *FilePanel) CreateDirectory(name string) error {
 	return err
 }
 
+func (c *FilePanel) Remove() error {
+	item := c.content.Items[c.content.CurrentItemIndex]
+	err := c.driver.Remove(c.currentDirectory, item.Name)
+	if err != nil {
+		fmt.Println("Error removing item", err)
+	}
+	c.UpdateContent()
+	return err
+}
+
 func (f *FilePanel) SetCurrentDirectory(path *common.Path) {
 	f.currentDirectory = path
 }

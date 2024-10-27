@@ -7,4 +7,5 @@ type Driver interface {
 	GetRoot() *Path
 	Separator() string
 	CreateDirectory(path *Path, name string) error
+	Remove(path *Path, name string) error
 }

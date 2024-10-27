@@ -156,6 +156,21 @@ func (c *DriverLocalFS) CreateDirectory(path *common.Path, name string) error {
 	return err
 }
 
+func (c *DriverLocalFS) Remove(path *common.Path, name string) error {
+	dir := path.String(c.Separator())
+	if path.RootName != "" {
+		dir = path.RootName + dir
+	}
+	fmt.Println("Removing item", dir, name)
+	fullPath := dir + c.Separator() + name
+
+	err := os.Remove(fullPath)
+	if err != nil {
+		fmt.Println("Error removing item", err)
+	}
+	return err
+}
+
 func formatFileSize(bytes int64) string {
 	result := formatNumber(fmt.Sprint(bytes))
 	return result

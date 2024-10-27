@@ -2,6 +2,7 @@
 import FilePanel from './FilePanel.vue'
 import SelectDriverDialog from './SelectDriverDialog.vue';
 import CreateDirectoryDialog from './CreateDirectoryDialog.vue';
+import Remove from './Remove.vue';
 import { EventsEmit } from '../../wailsjs/runtime/runtime';
 import { GetFilePanelContentAsJson, CreateDirectory } from '../../wailsjs/go/main/App'
 
@@ -33,6 +34,11 @@ window.addEventListener('keydown', function (event) {
     if (!event.altKey && event.key == 'F7') {
         event.preventDefault();
         openPanelDialog("createDirectory", -1);
+    }
+
+    if (!event.altKey && event.key == 'F8') {
+        event.preventDefault();
+        openPanelDialog("remove", -1);
     }
 
     if (event.key === 'Tab') {
@@ -178,6 +184,7 @@ const createDirectory = async (directoryName, panelIndex) => {
                     <SelectDriverDialog v-if="dialogCode == 'selectDriver0'" />
                     <SelectDriverDialog v-if="dialogCode == 'selectDriver1'" />
                     <CreateDirectoryDialog v-if="dialogCode == 'createDirectory'" :panelIndex="data.currentTab" @dialog-accept="createDirectory" />
+                    <Remove v-if="dialogCode == 'remove'" :panelIndex="data.currentTab" @dialog-accept="createDirectory" />
                 </div>
             </div>
 
