@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 	"vnav/system"
 )
 
@@ -52,4 +53,11 @@ func (c *App) MainAction(panelIndex int) {
 
 func (c *App) GoBack(panelIndex int) {
 	c.s.GoBack(panelIndex)
+}
+
+func (c *App) CreateDirectory(name string, panelIndex int) {
+	c.s.CreateDirectory(name, panelIndex)
+	time.Sleep(2 * time.Second)
+	//runtime.EventsEmit(c.ctx, "updateContent", panelIndex)
+
 }

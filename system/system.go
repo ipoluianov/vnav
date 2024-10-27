@@ -84,3 +84,9 @@ func (c *System) GoBack(panelIndex int) {
 	defer c.mtx.Unlock()
 	c.filePanels[panelIndex].GoBack()
 }
+
+func (c *System) CreateDirectory(name string, panelIndex int) {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	c.filePanels[panelIndex].CreateDirectory(name)
+}

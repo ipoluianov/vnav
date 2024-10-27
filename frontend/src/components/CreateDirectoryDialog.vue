@@ -2,12 +2,14 @@
 import { ref } from 'vue'
 
 const props = defineProps({
-    parentDirectory: String,
+    panelIndex: Number,
 })
 
+const emit = defineEmits(['dialog-accept'])
 let newDirectoryName = ref('')
 let createDirectory = () => {
-    console.log('Creating directory: ' + props.parentDirectory + "/" + newDirectoryName.value)
+    console.log('Creating directory: ' + newDirectoryName.value)
+    emit('dialog-accept', newDirectoryName.value, props.panelIndex)
 }
 </script>
 

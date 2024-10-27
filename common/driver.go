@@ -6,4 +6,5 @@ type Driver interface {
 	PathToString(path *Path) string
 	GetRoot() *Path
 	Separator() string
+	CreateDirectory(path *Path, name string) error
 }

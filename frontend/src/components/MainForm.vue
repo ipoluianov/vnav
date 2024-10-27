@@ -2,6 +2,9 @@
 import FilePanel from './FilePanel.vue'
 import SelectDriverDialog from './SelectDriverDialog.vue';
 import CreateDirectoryDialog from './CreateDirectoryDialog.vue';
+import { EventsEmit } from '../../wailsjs/runtime/runtime';
+import { GetFilePanelContentAsJson, CreateDirectory } from '../../wailsjs/go/main/App'
+
 import { ref, reactive } from 'vue'
 
 const dialogKeyDown = (event) => {
@@ -37,6 +40,9 @@ window.addEventListener('keydown', function (event) {
         data.currentTab = data.currentTab === 0 ? 1 : 0;
     }
 });
+
+const onCloseDialog = () => {
+}   
 
 const activatePanel = (index) => {
     data.currentTab = index;
@@ -107,6 +113,7 @@ const styleForFooter = () => {
 let dialogIsOpen = ref(false);
 let dialogCode = '';    
 let dialogPosition = -1;
+let dialogOperationIsProcessing = false;
 
 const openPanelDialog = (dialogToOpen, position) => {
     dialogCode = dialogToOpen;
@@ -115,6 +122,9 @@ const openPanelDialog = (dialogToOpen, position) => {
 }
 
 const closePanelDialog = () => {
+    if (dialogOperationIsProcessing) {
+        return;
+    }
     dialogIsOpen.value = false;
 }
 
@@ -154,6 +164,16 @@ const dialogId = () => {
     return 'dialog_';
 }
 
+const createDirectory = async (directoryName, panelIndex) => {
+    dialogOperationIsProcessing = true;
+    console.log('1111Creating directory: ' + directoryName + ' in panel ' + panelIndex);
+    await CreateDirectory(directoryName, panelIndex);
+    EventsEmit('updateContent', panelIndex);
+    dialogOperationIsProcessing = false;
+
+    closePanelDialog();
+}
+
 </script>
 
 <template>
@@ -165,7 +185,7 @@ const dialogId = () => {
                 <div :id="dialogId()" class="dialog" :style="dialogDivStyle()">
                     <SelectDriverDialog v-if="dialogCode == 'selectDriver0'" />
                     <SelectDriverDialog v-if="dialogCode == 'selectDriver1'" />
-                    <CreateDirectoryDialog v-if="dialogCode == 'createDirectory'" />
+                    <CreateDirectoryDialog v-if="dialogCode == 'createDirectory'" :panelIndex="data.currentTab" @dialog-accept="createDirectory" />
                 </div>
             </div>
 

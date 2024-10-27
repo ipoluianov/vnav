@@ -135,6 +135,21 @@ func (c *DriverLocalFS) ReadDir(path *common.Path) ([]*common.Item, error) {
 	return items, nil
 }
 
+func (c *DriverLocalFS) CreateDirectory(path *common.Path, name string) error {
+	dir := path.String(c.Separator())
+
+	if path.RootName != "" {
+		dir = path.RootName + dir
+	}
+
+	err := os.Mkdir(dir+c.Separator()+name, 0755)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func formatFileSize(bytes int64) string {
 	result := formatNumber(fmt.Sprint(bytes))
 	return result

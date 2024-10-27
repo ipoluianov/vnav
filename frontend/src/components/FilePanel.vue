@@ -1,5 +1,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
+import { EventsOn } from '../../wailsjs/runtime/runtime';
+
 import { GetFilePanelContentAsJson, GoBack, MainAction, SetCurrentItemIndex, UpdateContent } from '../../wailsjs/go/main/App'
 
 const data = reactive(
@@ -48,7 +50,7 @@ const onDblClickItem = async (index) => {
     if (document.dialogIsOpen == true) {
         return
     }
-        
+
     emit('activate-panel', props.panelIndex);
     setCurrentItemIndex(index);
     await MainAction(props.panelIndex);
@@ -106,6 +108,14 @@ window.addEventListener('keydown', async (event) => {
 
     //console.log(event.key);
 });
+
+EventsOn('updateContent', async (panelIndex) => {
+    if (panelIndex != props.panelIndex) {
+        return
+    }
+    await loadContent();
+});
+
 //////////////////////////////////////////////////////////////////////
 
 const setCurrentItemIndex = async (index) => {
@@ -389,5 +399,4 @@ thead {
 .scrollable-content::-webkit-scrollbar-thumb:hover {
     background-color: #EEE;
 }
-
 </style>

@@ -119,6 +119,14 @@ func (f *FilePanel) GoBack() {
 	}
 }
 
+func (c *FilePanel) CreateDirectory(name string) {
+	err := c.driver.CreateDirectory(c.currentDirectory, name)
+	if err != nil {
+		fmt.Println("Error creating directory", err)
+	}
+	c.UpdateContent()
+}
+
 func (f *FilePanel) SetCurrentDirectory(path *common.Path) {
 	f.currentDirectory = path
 }
